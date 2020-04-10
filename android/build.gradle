@@ -23,6 +23,7 @@ android {
         targetSdkVersion safeExtGet('targetSdkVersion', 22)
         versionCode 1
         versionName "1.0"
+        buildConfigField "String", "JS_EXECUTOR", "\"${safeExtGet("jsExecutor", "jscexecutor")}\""
     }
     lintOptions {
         abortOnError false

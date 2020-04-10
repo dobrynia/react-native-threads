@@ -2,6 +2,7 @@ package com.reactlibrary;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
 import com.facebook.hermes.reactexecutor.HermesExecutorFactory;
 import com.facebook.react.NativeModuleRegistryBuilder;
@@ -19,6 +20,8 @@ import com.facebook.react.bridge.queue.ReactQueueConfigurationSpec;
 import com.facebook.react.devsupport.interfaces.DevSupportManager;
 import com.facebook.soloader.SoLoader;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
@@ -58,15 +61,36 @@ public class ReactContextBuilder {
     }
 
     private JavaScriptExecutorFactory getJSExecutorFactory() {
-        try {
-            String appName = Uri.encode(parentContext.getPackageName());
-            String deviceName = Uri.encode(getFriendlyDeviceName());
-            // If JSC is included, use it as normal
-            SoLoader.loadLibrary("jscexecutor");
-            return new JSCExecutorFactory(appName, deviceName);
-        } catch (UnsatisfiedLinkError jscE) {
-            // Otherwise use Hermes
-            return new HermesExecutorFactory();
+        String jsExecutor = BuildConfig.JS_EXECUTOR;
+        switch (jsExecutor) {
+            case "jscexecutor": {
+                try {
+                    String appName = Uri.encode(parentContext.getPackageName());
+                    String deviceName = Uri.encode(getFriendlyDeviceName());
+                    // If JSC is included, use it as normal
+                    SoLoader.loadLibrary(jsExecutor);
+                    return new JSCExecutorFactory(appName, deviceName);
+
+                } catch (UnsatisfiedLinkError jscE) {
+                    // Otherwise use Hermes
+                    return new HermesExecutorFactory();
+                }
+            }
+            case "v8executor": {
+                try {
+                    Class<?> v8ExecutorFactoryClass = Class.forName("com.facebook.v8.reactexecutor.V8ExecutorFactory");
+                    Constructor constructor = v8ExecutorFactoryClass.getConstructor();
+                    return (JavaScriptExecutorFactory) constructor.newInstance();
+                } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+                    e.printStackTrace();
+                    devSupportManager.handleException(e);
+
+                    return new HermesExecutorFactory();
+                }
+            }
+            default: {
+                return new HermesExecutorFactory();
+            }
         }
     }
 
