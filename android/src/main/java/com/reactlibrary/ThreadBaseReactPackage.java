@@ -9,12 +9,14 @@ import com.facebook.react.modules.appstate.AppStateModule;
 import com.facebook.react.modules.core.ExceptionsManagerModule;
 import com.facebook.react.modules.core.Timing;
 import com.facebook.react.modules.debug.SourceCodeModule;
+import com.facebook.react.modules.deviceinfo.DeviceInfoModule;
 import com.facebook.react.modules.intent.IntentModule;
 import com.facebook.react.modules.network.NetworkingModule;
 import com.facebook.react.modules.storage.AsyncStorageModule;
 import com.facebook.react.modules.systeminfo.AndroidInfoModule;
 import com.facebook.react.modules.vibration.VibrationModule;
 import com.facebook.react.modules.websocket.WebSocketModule;
+import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.ViewManager;
 import com.facebook.react.modules.debug.DevSettingsModule;
 
@@ -38,7 +40,6 @@ public class ThreadBaseReactPackage implements ReactPackage {
                 new ExceptionsManagerModule(reactInstanceManager.getDevSupportManager()),
                 new AppStateModule(catalystApplicationContext),
                 new Timing(catalystApplicationContext, reactInstanceManager.getDevSupportManager()),
-                new UIManagerStubModule(catalystApplicationContext),
                 new SourceCodeModule(catalystApplicationContext),
                 new JSCHeapCapture(catalystApplicationContext),
 
@@ -49,7 +50,9 @@ public class ThreadBaseReactPackage implements ReactPackage {
                 new VibrationModule(catalystApplicationContext),
                 new WebSocketModule(catalystApplicationContext),
                 new ThreadSelfModule(catalystApplicationContext),
-                new DevSettingsModule(reactInstanceManager.getDevSupportManager())
+                new DevSettingsModule(reactInstanceManager.getDevSupportManager()),
+                new DeviceInfoModule(catalystApplicationContext),
+                new UIManagerModule(catalystApplicationContext, createViewManagers(catalystApplicationContext), 0)
         );
     }
 
